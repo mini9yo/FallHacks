@@ -17,8 +17,8 @@ const App = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold mb-6">Transit App</h1>
+    <div className="flex justify-center border-2 border-red-500">
+      <h1 className="text-red-500 mb-6">Transit App</h1>
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <div className="mb-4">
           <label htmlFor="start" className="block text-sm font-medium text-gray-700 mb-1">Start Point</label>
