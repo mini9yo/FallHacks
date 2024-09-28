@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Home = () => {
+const App = () => {
   const [startPoint, setStartPoint] = useState('');
   const [endPoint, setEndPoint] = useState('');
   const [error, setError] = useState('');
@@ -13,59 +13,45 @@ const Home = () => {
     }
     setError('');
     console.log(`Start Point: ${startPoint}, End Point: ${endPoint}`);
-
-    fetch(`http://localhost:8080/api/routes?start=${startPoint}&end=${endPoint}`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setRoutes(data);
-      })
-      .catch((error) => {
-        setError('Error fetching routes: ' + error.message);
-      });
+    // Add logic to fetch routes here
   };
 
   return (
-    <div className="flex justify-center border-2 border-red-500">
-      <h1 className="text-red-500 mb-6">Transit App</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <div className="mb-4">
-          <label htmlFor="start" className="block text-sm font-medium text-gray-700 mb-1">Start Point</label>
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-blue-300 to-blue-500">
+      <h1 className="text-5xl font-extrabold text-white mb-8">Transit App</h1>
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <div className="mb-6">
+          <label htmlFor="start" className="block text-lg font-medium text-gray-800 mb-2">Start Point</label>
           <input
             type="text"
             id="start"
             value={startPoint}
             onChange={(e) => setStartPoint(e.target.value)}
-            className="border border-gray-300 rounded p-2 w-full"
+            className="border border-gray-300 rounded-lg p-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
             placeholder="Enter start point"
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="end" className="block text-sm font-medium text-gray-700 mb-1">End Point</label>
+        <div className="mb-6">
+          <label htmlFor="end" className="block text-lg font-medium text-gray-800 mb-2">End Point</label>
           <input
             type="text"
             id="end"
             value={endPoint}
             onChange={(e) => setEndPoint(e.target.value)}
-            className="border border-gray-300 rounded p-2 w-full"
+            className="border border-gray-300 rounded-lg p-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
             placeholder="Enter end point"
           />
         </div>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <button
           type="submit"
-          className="bg-blue-500 text-white py-2 rounded w-full hover:bg-blue-600 transition"
+          className="bg-blue-600 text-white py-3 rounded-lg w-full hover:bg-blue-700 transition duration-200 ease-in-out shadow-md"
         >
           Find Routes
         </button>
       </form>
-      
     </div>
   );
 };
 
-export default Home;
+export default App;
