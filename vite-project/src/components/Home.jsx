@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const App = () => {
+const Home = () => {
   const [startPoint, setStartPoint] = useState('');
   const [endPoint, setEndPoint] = useState('');
   const [error, setError] = useState('');
@@ -13,7 +13,20 @@ const App = () => {
     }
     setError('');
     console.log(`Start Point: ${startPoint}, End Point: ${endPoint}`);
-    // Here, you can add your logic to fetch routes
+
+    fetch(`http://localhost:8080/api/routes?start=${startPoint}&end=${endPoint}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setRoutes(data);
+      })
+      .catch((error) => {
+        setError('Error fetching routes: ' + error.message);
+      });
   };
 
   return (
@@ -54,4 +67,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Home;

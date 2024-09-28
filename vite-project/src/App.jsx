@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
@@ -26,12 +27,20 @@ function App() {
   //           setLoading(false); 
   //       });
   // }, []); 
+=======
+import React from 'react';
+import Home from './components/Home'; // Correct import
+>>>>>>> refs/remotes/origin/main
 
+const App = () => {
   return (
-    <>
-     <Home/>
-    </>
+    <div className="app-container">
+      <header className="app-header">
+        <h1>Transit Route Finder</h1>
+      </header>
+      <Home /> {/* Render the Home component */}
+    </div>
   );
-}
+};
 
 export default App;
