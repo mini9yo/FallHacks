@@ -1,0 +1,57 @@
+import React, { useState } from 'react';
+
+const App = () => {
+  const [startPoint, setStartPoint] = useState('');
+  const [endPoint, setEndPoint] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!startPoint || !endPoint) {
+      setError('Both fields are required.');
+      return;
+    }
+    setError('');
+    console.log(`Start Point: ${startPoint}, End Point: ${endPoint}`);
+    // Here, you can add your logic to fetch routes
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+      <h1 className="text-4xl font-bold mb-6">Transit App</h1>
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div className="mb-4">
+          <label htmlFor="start" className="block text-sm font-medium text-gray-700 mb-1">Start Point</label>
+          <input
+            type="text"
+            id="start"
+            value={startPoint}
+            onChange={(e) => setStartPoint(e.target.value)}
+            className="border border-gray-300 rounded p-2 w-full"
+            placeholder="Enter start point"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="end" className="block text-sm font-medium text-gray-700 mb-1">End Point</label>
+          <input
+            type="text"
+            id="end"
+            value={endPoint}
+            onChange={(e) => setEndPoint(e.target.value)}
+            className="border border-gray-300 rounded p-2 w-full"
+            placeholder="Enter end point"
+          />
+        </div>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <button
+          type="submit"
+          className="bg-blue-500 text-white py-2 rounded w-full hover:bg-blue-600 transition"
+        >
+          Find Routes
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default App;

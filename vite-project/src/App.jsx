@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
+import Home from "./components/Home"
 
 function App() {
   const [stops, setStops] = useState([]); 
@@ -28,19 +29,7 @@ function App() {
 
   return (
     <>
-      <h1>Transit Route Finder</h1>
-
-      {loading && <p>Loading stops...</p>} 
-      {error && <p>Error fetching stops: {error.message}</p>} 
-
-      <div className="stops-list">
-          {stops.map((stop) => (
-              <div key={stop.id} className="stop">
-                  <p>{stop.name}</p>
-                  <p>Lat: {stop.latitude}, Lon: {stop.longitude}</p>
-              </div>
-          ))}
-      </div>
+     <Home/>
     </>
   );
 }
