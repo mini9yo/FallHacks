@@ -1,0 +1,12 @@
+{
+    "routers": {
+      "default": {
+        "name": "Default Router",
+        "searchRadius": 500,
+        "transfer": {
+          "transferDistance": 200
+        }
+      }
+    }
+  }
+  
