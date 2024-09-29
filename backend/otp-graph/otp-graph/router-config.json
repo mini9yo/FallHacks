@@ -1,0 +1,14 @@
+{
+    "routers": {
+      "default": {
+        "name": "Default Router",
+        "transit": {
+          "disableReroute": false
+        },
+        "walk": {
+          "maxDistance": 500
+        }
+      }
+    }
+  }
+  

@@ -1,8 +1,58 @@
+// const express = require('express');
+// const fetch = require('node-fetch');
+// const cors = require('cors');
+// const path = require('path'); // Import path module
+// const loadStops = require('./loadStops'); // Load mock stops data
+
+// const app = express();
+// const port = process.env.PORT || 3000;
+
+// // Load the stops data
+// const stops = loadStops();
+
+// // Enable CORS
+// app.use(cors());
+
+// // Serve static files from the React app
+// app.use(express.static(path.join(__dirname, 'build')));
+
+// // API route to interact with OTP and fetch transit routes
+// app.get('/api/plan', async (req, res) => {
+//     const { fromPlace, toPlace, time } = req.query;
+
+//     // Convert stop IDs to coordinates
+//     const fromCoordinates = stops[fromPlace];
+//     const toCoordinates = stops[toPlace];
+
+//     if (!fromCoordinates || !toCoordinates) {
+//         return res.status(400).json({ error: 'Invalid stop ID(s) provided.' });
+//     }
+
+//     // Construct OTP URL with latitude and longitude
+//     const otpUrl = `http://localhost:8080/otp/routers/default/plan?fromPlace=${fromCoordinates.lat},${fromCoordinates.lon}&toPlace=${toCoordinates.lat},${toCoordinates.lon}&time=${time}&mode=TRANSIT,WALK`;
+
+//     try {
+//         const response = await fetch(otpUrl);
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+//         const data = await response.json();
+//         res.json(data);
+//     } catch (error) {
+//         console.error('Error fetching data from OTP:', error);
+//         res.status(500).json({ error: 'Error fetching data from OTP server' });
+//     }
+// });
+
+// // Start the server
+// app.listen(port, () => {
+//     console.log(`Server is running on port ${port}`);
+// });
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -10,9 +60,6 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-// Set your Graphhopper API key
-const GRAPHOPPER_API_KEY = '3707abc8-3fc0-4f47-8dc9-da9e334a3796';
-const GRAPHOPPER_URL = 'https://graphhopper.com/api/1/route';
 
 // Function to load GTFS stops data
 function loadStops() {
@@ -22,44 +69,37 @@ function loadStops() {
     fs.readFileSync(filePath, 'utf8').split('\n').slice(1).forEach(line => {
         const [id, code, name, desc, lat, lon] = line.split(',');
         if (id) {
-            stops.push({ id, name, latitude: parseFloat(lat), longitude: parseFloat(lon) });
+            stops.push({ code, name, latitude: parseFloat(lat), longitude: parseFloat(lon) });
         }
     });
     return stops;
 }
-
-// Function to load trips data
-function loadTrips() {
-    const filePath = path.join(__dirname, 'gtfs', 'trips.txt');
-    const trips = [];
-    
-    fs.readFileSync(filePath, 'utf8').split('\n').slice(1).forEach(line => {
-        const [route_id, service_id, trip_id, trip_headsign, trip_short_name, direction_id, block_id, shape_id] = line.split(',');
-        if (trip_id) {
-            trips.push({ route_id, service_id, trip_id, trip_headsign });
+ 
+async function coorToAddress(lat,long)
+{
+    const apiKey = "AIzaSyBMf52_BRl8QKID5lwoEHk92KQ2yu9fQzU" ;
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${apiKey}`;
+    // Covert longitude and longitude to 
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.status === 'OK') {
+            return data.results[0].formatted_address;  // Return the formatted address
+        } else {
+            throw new Error(`Geocoding error: ${data.status}`);
         }
-    });
-    return trips;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;  // Re-throw the error to be handled in the calling function
+    }
 }
 
-// Function to load stop times data
-function loadStopTimes() {
-    const filePath = path.join(__dirname, 'gtfs', 'stop_times.txt');
-    const stopTimes = [];
-    
-    fs.readFileSync(filePath, 'utf8').split('\n').slice(1).forEach(line => {
-        const [trip_id, arrival_time, departure_time, stop_id, stop_sequence, stop_headsign] = line.split(',');
-        if (trip_id) {
-            stopTimes.push({ trip_id, arrival_time, departure_time, stop_id });
-        }
-    });
-    return stopTimes;
-}
+
 
 // Endpoint to calculate routes based on user inputs
 app.get('/api/routes', async (req, res) => {
     const { start, end } = req.query;
-
     // Validate inputs
     if (!start || !end) {
         return res.status(400).json({ error: "Start and end points are required." });
@@ -67,38 +107,39 @@ app.get('/api/routes', async (req, res) => {
 
     // Load necessary data
     const stops = loadStops();
-    const trips = loadTrips();
-    const stopTimes = loadStopTimes();
     
     // Find start and end stop coordinates from GTFS data
-    const startStop = stops.find(stop => stop.id === start);
-    const endStop = stops.find(stop => stop.id === end);
+    const startStop = stops.find(stop => stop.code === start);
+    const endStop = stops.find(stop => stop.code === end);
 
     if (!startStop || !endStop) {
         return res.status(404).json({ error: "Start or end stop not found." });
     }
+    const startAddress = await coorToAddress(startStop.latitude, startStop.longitude);
+    const endAddress = await coorToAddress(endStop.latitude, endStop.longitude);
+    // Prepare Distance Matrix API call
+    const apiKey = "AIzaSyBMf52_BRl8QKID5lwoEHk92KQ2yu9fQzU";  // Your API key
+    const origin = encodeURI(startAddress);  // The starting point address
+    const destination = encodeURI(endAddress);  // The ending point address
 
-    const startCoords = `${startStop.latitude},${startStop.longitude}`;
-    const endCoords = `${endStop.latitude},${endStop.longitude}`;
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&mode=transit&key=${apiKey}`;
 
-    try {
-        // Call the Graphhopper API for routing
-        const response = await axios.get(GRAPHOPPER_URL, {
-            params: {
-                point: [startCoords, endCoords],
-                key: GRAPHOPPER_API_KEY,
-                vehicle: 'public_transport',
-                algorithm: 'dijkstra'
-            }
+    // Fetch distance and duration from Google Distance Matrix API
+    const fetchResponse = await fetch(url);
+    const data = await fetchResponse.json();
+    if (data.status === 'OK') {
+        const element = data.rows[0].elements[0];
+        const distance = element.distance.text;
+        const duration = element.duration.text;
+
+        return res.status(200).json({
+            startAddress,
+            endAddress,
+            distance,
+            duration
         });
-
-        const routes = response.data.paths;
-        res.json(routes);
-    } catch (error) {
-        console.error("Error fetching route data:", error);
-        res.status(500).json({ error: 'Error fetching route data from Graphhopper' });
     }
-});
+    });
 
 // Start the server
 app.listen(PORT, () => {
